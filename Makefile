@@ -1,16 +1,6 @@
 CC = clang++#g++
 
-#CONFIG += link_pkgconfig
-
-#PKGCONFIG += gtk+-3.0
-#CPPFLAGS="-I/opt/gtk/include"
-#LDFLAGS="-L/opt/gtk/lib"
-#PKG_CONFIG_PATH="/opt/gtk/lib/pkgconfig"
-#export CPPFLAGS LDFLAGS PKG_CONFIG_PATH
-
-#X_CFLAGS= -std=c++11 -Werror `pkg-config --cflags gtk+-3.0`
-#X_LDFLAGS=`pkg-config --libs gtk+-3.0` -lm
-
+PKGCONFIG += gtk+-3.0
 
 EXE = TranslateLX
 
@@ -21,10 +11,16 @@ TEST_DIR = tests
 SRC = $(wildcard $(SRC_DIR)/*.cpp)
 OBJ = $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
-CPPFLAGS += -I./include
-CFLAGS += --std=c++11 -Wall `pkg-config --cflags gtk+-3.0`
-LDFLAGS += -L./lib
-LDLIBS += `pkg-config --libs gtk+-3.0` -lm
+CPPFLAGS += -I./include 
+CFLAGS += -std=c++11 -Wall `pkg-config --cflags gtk+-3.0`
+LDFLAGS += -L./lib \
+	   -I/home/michal/cppLibs/curl-7.49.1/curl/include/ \
+	   -L/home/michal/cppLibs/curl-7.49.1/curl/lib/ \
+	   -L/home/michal/cppLibs/openssl-master/openssl/lib
+
+LDLIBS += `pkg-config --libs gtk+-3.0` -lcurl -lssl -lcrypto
+
+export LD_LIBRARY_PATH=/home/michal/cppLibs/curl-7.49.1/curl/lib/:/home/michal/cppLibs/openssl-master/openssl/lib
 
 .PHONY: all clean
 
@@ -35,12 +31,20 @@ $(EXE): $(OBJ)
 
 test: $(TEST_DIR)/tests.cpp
 
-$(TEST_DIR)/tests.cpp: obj/byGlosbe.o
-	$(CC) -std=c++11 -I/home/michal/Pulpit/boost_1_61_0/ -I/home/michal/Pulpit/curl-7.49.1/include/ -L/home/michal/Pulpit/curl-7.49.1/lib/ $@ $^ -lcurl -o tests/tests
+$(TEST_DIR)/tests.cpp: obj/diByGlosbe.o obj/wiByCurl.o
+	LD_LIBRARY_PATH=/home/michal/cppLibs/curl-7.49.1/curl/lib/ \
+	$(CC) $(CFLAGS) \
+			-I/home/michal/cppLibs/boost_1_61_0/ \
+			-I/home/michal/cppLibs/curl-7.49.1/curl/include/ \
+			-L/home/michal/cppLibs/curl-7.49.1/curl/lib/ \
+			-L/home/michal/cppLibs/openssl-master/openssl/lib \
+			$@ $^ \
+			$(LDLIBS) \
+			-o tests/tests
 #g++ -I/home/michal/Pulpit/boost_1_61_0/ tests/tests.cpp -L/home/michal/Pulpit/boost_1_61_0/stage/lib/libboost_unit_test_framework.so -o hello
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@		
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -c $< $(LDLIBS) -o $@		
 
 clean:
 	$(RM) $(OBJ)
