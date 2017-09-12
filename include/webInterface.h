@@ -4,5 +4,8 @@
 
 class WebInterface{
 public:
-  virtual std::string getWebPageCode(const std::string &addr)=0;
+  std::string htmlCode;
+  std::string lastAddr;
+
+  virtual std::string& getWebPageCode(const std::string &addr)=0;
 };

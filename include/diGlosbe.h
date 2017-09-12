@@ -2,19 +2,21 @@
 #define BYGLOSBE_H
 
 #include "dictionaryInterface.h"
-#include "wiByCurl.h"
-#include <regex>
+#include "translationByGlosbe.h"
+#include "pronunciationByGlosbe.h"
+#include "youMeanByGlosbe.h"
+#include "languageListByGlosbe.h"
+#include "wiCurl.h"
 
-class DiByGlosbe: public DictionaryInterface
+class DiGlosbe: public DictionaryInterface
 {
 public:
-  DiByGlosbe();
-  std::vector<std::string>& getTranslation();
-  std::vector<std::string>& getYouMean();
-  std::vector<std::string>& getPronunciation();
-  std::vector<std::string>& getExamples();
-  std::vector<std::string>& getDefinition();
-  std::map<std::string, std::string>& getListOfLanguages();
+  DiGlosbe(){
+    translation = new TranslationByGlosbe;
+    youMean = new YouMeanByGlosbe;
+    pronunciation = new PronunciationByGlosbe;
+    languageList = new LanguageListByGlosbe;
+  }
 };
 
 #endif // BYGLOSBE_H

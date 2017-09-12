@@ -5,7 +5,8 @@
 #include <sstream>
 #include <curl/curl.h>
 
-class WiByCurl: public WebInterface
+class WiCurl: public WebInterface
 {
-  std::string getWebPageCode(const std::string &addr);
+public:
+  std::string& getWebPageCode(const std::string &addr);
 };

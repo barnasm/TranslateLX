@@ -1,38 +1,39 @@
 #ifndef DISTIONATYINTERFACE_H
 #define DISTIONATYINTERFACE_H
 
-#include "dictionaryInterface.h"
-#include "webInterface.h"
+#include "dictionaryDataInterface.h"
+#include "languageListByGlosbe.h"
 #include <vector>
+
 #include <string>
 #include <map>
 
 class DictionaryInterface
 {
 public:
-  WebInterface *webInterface;
-  std::string htmlCode;
   
-  std::vector<std::string> translation;
-  std::vector<std::string> youMean;
-  std::vector<std::string> pronunciation;
-  std::vector<std::string> examples;
-  std::vector<std::string> definition;
-  std::map<std::string, std::string> listOfLanguages;
+  DictionaryDataInterface *translation;
+  DictionaryDataInterface *youMean;
+  DictionaryDataInterface *pronunciation;
+  //DictionaryDataInterface *example;
+  //DictionaryDataInterface *definition;
+  LanguageListByGlosbe *languageList;
   //voice
 
-  //  DictionaryInterface( std::vector<std::string> code): htmlCode(code){}
-  
-  void setSourceCode(std::string code){
-    htmlCode = code;
+  virtual std::vector<std::string> getTranslation(const std::string& sentence){
+    return translation->getData( sentence );
   }
-
-  virtual std::vector<std::string>& getTranslation() = 0;
-  virtual std::vector<std::string>& getYouMean()=0;
-  virtual std::vector<std::string>& getPronunciation()=0;
-  virtual std::vector<std::string>& getExamples()=0;
-  virtual std::vector<std::string>& getDefinition()=0;
-  virtual std::map<std::string, std::string>& getListOfLanguages()=0;
+  virtual std::vector<std::string> getYouMean(const std::string& sentence){
+    return youMean->getData(sentence );
+  }
+  virtual std::vector<std::string> getPronunciation(const std::string& sentence){
+    return pronunciation->getData( sentence );
+  }
+  //virtual std::vector<std::string> getExamples()=0;
+  //virtual std::vector<std::string> getDefinition()=0;
+  virtual std::map<std::string, std::string> getLanguageList(){
+    return languageList->getData();
+  }
   //getVoice();
 };
 
