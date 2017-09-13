@@ -16,10 +16,29 @@
 #include <QWidgetAction>
 #include <QCheckBox>
 #include <QComboBox>
-#include <languageInfo.h>
 */
-class MainWindow
+#include <gtkmm/window.h>
+#include <gtkmm/textview.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/scrollbar.h>
+#include <gtkmm/combobox.h>
+class MainWindow : public Gtk::Window
 {
+private:
+  Gtk::HBox boxPrimary;
+  Gtk::VBox boxCentral;
+  Gtk::TextView textTranslation;
+  Gtk::TextView textPronunciation;
+  Gtk::Scrollbar scrollTranslation;
+  Gtk::Scrollbar scrollPronunciation;
+  Gtk::Button buttonPrev;
+  Gtk::Button buttonNext;
+  Gtk::Button buttonAudio;
+  Gtk::ComboBox comboLangFrom;
+  Gtk::ComboBox comboLangTo;
+  void setWindow();
+
   /*
 private:
     QSize *bottonSizeMax  = new QSize(21, 1000);
@@ -42,7 +61,6 @@ private:
 
     void setTray();
 
-    void setWindow();
     void emitClick();
 
     ContentOfWebpage *contentOfWebpage;
@@ -59,7 +77,8 @@ private:
     QAction *actionQuit;
   */
 public:
-    MainWindow();
+  MainWindow();
+  virtual ~MainWindow(){};
   /*
   void setWindowPosition(QPoint pos);
     void windowShow();

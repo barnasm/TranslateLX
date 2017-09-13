@@ -3,20 +3,42 @@
 MainWindow::MainWindow()
 {
   //setTray();
-  //setWindow();
+  setWindow();
   //setWidgets();
 }
-/*
-void MainWindow::setWindow(){
-    window = new QWidget;
-        window->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Drawer);
 
-        window->setMinimumSize(*windowSizeMin);
-        window->setMaximumSize(*windowSizeMax);
-        window->setFixedSize(*windowSizeMin);
-        setWindowPosition(QCursor::pos());
+void MainWindow::setWindow(){
+  add(boxPrimary);
+  set_decorated(false);
+  set_keep_above(true);
+  set_resizable(false);
+
+  boxPrimary.add(buttonPrev);
+  boxPrimary.add(boxCentral);
+  boxPrimary.add(buttonNext);
+ 
+  boxCentral.add(textTranslation);
+  boxCentral.add(textPronunciation);
+  boxCentral.add(buttonAudio);
+  boxCentral.add(comboLangFrom);
+  boxCentral.add(comboLangTo);
+  
+  textTranslation.set_size_request(200, 20);
+  textPronunciation.set_size_request(200, 20);
+  // textTranslation.set_vscroll_policy(Gtk::ScrollablePolicy::SCROLL_MINIMUM);
+  // textPronunciation.set_vscroll_policy(Gtk::ScrollablePolicy::SCROLL_NATURAL);
+  //textTranslation.set_editable(false);
+  //textPronunciation.set_editable(false);
+  show_all();
+  // window = new QWidget;
+    //     window->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Drawer);
+
+    //     window->setMinimumSize(*windowSizeMin);
+    //     window->setMaximumSize(*windowSizeMax);
+    //     window->setFixedSize(*windowSizeMin);
+    //     setWindowPosition(QCursor::pos());
 }
-void MainWindow::setWindowPosition(QPoint pos = QCursor::pos()){
+/*void MainWindow::setWindowPosition(QPoint pos = QCursor::pos()){
     window->move(pos);
 }
 
