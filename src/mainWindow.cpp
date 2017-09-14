@@ -35,6 +35,9 @@ void MainWindow::setWindow(){
   //   textPronunciation.get_buffer()->create_child_anchor(textPronunciation.get_buffer()->end());
   // textPronunciation.add_child_at_anchor(buttonPronunciationVoice, refAnchor);
   
+  buttonPrev.set_label("◀");
+  buttonNext.set_label("▶");
+  buttonPronunciationVoice.set_label("♬");
   buttonPrev.signal_clicked().connect( sigc::bind<Gtk::Button*>( sigc::mem_fun(*this, &MainWindow::onButtonClicked), &buttonPrev) );
   buttonNext.signal_clicked().connect( sigc::bind<Gtk::Button*>( sigc::mem_fun(*this, &MainWindow::onButtonClicked), &buttonNext) );
   buttonPronunciationVoice.signal_clicked().
