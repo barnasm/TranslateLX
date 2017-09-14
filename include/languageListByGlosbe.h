@@ -9,13 +9,18 @@
 class LanguageListByGlosbe: public GetWebPageContent
 {
 public:
-  std::map<std::string, std::string> getData(){
+  std::map<std::string, std::string> res;
+
+  std::map<std::string, std::string> getData(const std::string& addr){
     //return getContent(code, "<strong class=\" phr\">(.*?)</strong>");
 
-    std::string code = webInterface->getWebPageCode("https://glosbe.com/");
+    if(not res.empty())
+      return res;
+        
+    std::string code = webInterface->getWebPageCode(addr);
 
     std::regex expr("/option><option value=\"(.*?)\">(.*?)<");
-    std::map<std::string, std::string> res;
+    
     std::smatch match;
     while (std::regex_search (code, match, expr))
       {

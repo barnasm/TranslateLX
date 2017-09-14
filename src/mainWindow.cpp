@@ -40,6 +40,11 @@ void MainWindow::setWindow(){
   buttonPronunciationVoice.signal_clicked().
     connect(sigc::mem_fun(*this, &MainWindow::onButtonPronunciationVoice));
 
+
+  comboLangFrom.signal_changed().connect(sigc::bind<Gtk::ComboBoxText*>(sigc::mem_fun(*this, &MainWindow::comboChanged), &comboLangFrom));
+  comboLangTo.  signal_changed().connect(sigc::bind<Gtk::ComboBoxText*>(sigc::mem_fun(*this, &MainWindow::comboChanged), &comboLangTo));
+  insertLanguagesToCombos();
+  
   show_all();
   // window = new QWidget;
     //     window->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Drawer);
@@ -109,6 +114,23 @@ void MainWindow::clipboardOwnerChange(GdkEventOwnerChange*)
   textTranslation.get_buffer()  ->set_text(di->getTranslation().empty()?   "Not found": di->getTranslation()[0]);
   textPronunciation.get_buffer()->set_text(di->getPronunciation().empty()? "Not found": di->getPronunciation()[0]);
   //textPronunciation.get_buffer()->insert(textPronunciation.get_buffer()->begin(), di->getPronunciation().empty()? "Not found": di->getPronunciation()[0]);
+}
+
+void MainWindow::comboChanged(Gtk::ComboBoxText* combo){
+  if(combo == &comboLangFrom){
+    di->langFromShort = di->getLanguageList()[combo->get_active_text()];
+  }else if(combo == &comboLangTo){
+    di->langToShort = di->getLanguageList()[combo->get_active_text()];
+  }
+}
+
+void MainWindow::insertLanguagesToCombos(){
+  for(auto a: di->getLanguageList()){
+    comboLangTo  .append(a.first);
+    comboLangFrom.append(a.first);
+  }
+  comboLangFrom.set_active_text("English");
+  comboLangTo.  set_active_text("Polish");
 }
 
 /*void MainWindow::setWindowPosition(QPoint pos = QCursor::pos()){
@@ -212,14 +234,6 @@ void MainWindow::getPreparedData(ContentOfWebpage *content){
     textEdit->clear();
     textEdit->moveCursor(QTextCursor::Start);
     textEdit->insertPlainText(contentOfWebpage->getCurrent().toStdString().c_str());
-}
-
-void MainWindow::getLanguagesList(LanguageInfo *languages){
-    languageInfo = languages;
-    for(int i = 0; i < languageInfo->langList.size(); i++){
-        comboBox1->addItem(languageInfo->langList[i]);
-        comboBox2->addItem(languageInfo->langList[i]);
-    }
 }
 
 bool MainWindow::isReady(){

@@ -23,7 +23,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
 #include <gtkmm/scrollbar.h>
-#include <gtkmm/combobox.h>
+#include <gtkmm/comboboxtext.h>
 #include <gst/gst.h>
 
 class MainWindow : public Gtk::Window
@@ -41,8 +41,8 @@ private:
   Gtk::Button buttonPrev;
   Gtk::Button buttonNext;
   Gtk::Button buttonPronunciationVoice;
-  Gtk::ComboBox comboLangFrom;
-  Gtk::ComboBox comboLangTo;
+  Gtk::ComboBoxText comboLangFrom;
+  Gtk::ComboBoxText comboLangTo;
   void setWindow();
 
   /*
@@ -89,7 +89,9 @@ public:
 //signals handlers
   void onButtonClicked(Gtk::Button*);
   void onButtonPronunciationVoice();
+  void comboChanged(Gtk::ComboBoxText*);
   void clipboardOwnerChange(GdkEventOwnerChange*);
+  void insertLanguagesToCombos();
   /*
   void setWindowPosition(QPoint pos);
     void windowShow();

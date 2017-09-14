@@ -7,12 +7,14 @@
 #include "youMeanByGlosbe.h"
 #include "languageListByGlosbe.h"
 #include "pronunciationVoiceAddrByGlosbe.h"
-#include "wiCurl.h"
 
 class DiGlosbe: public DictionaryInterface
 {
 public:
-  DiGlosbe(){
+  DiGlosbe(): DictionaryInterface("https://glosbe.com"){
+    langFromShort = "en";
+    langToShort = "pl";
+  
     translation = new TranslationByGlosbe;
     youMean = new YouMeanByGlosbe;
     pronunciation = new PronunciationByGlosbe;

@@ -2,15 +2,15 @@
 
 #include "dictionaryDataInterface.h"
 #include "getWebPageContent.h"
-#include "makeAddressGlosbe.h"
 
-class PronunciationByGlosbe: public DictionaryDataInterface, GetWebPageContent, MakeAddressGlosbe
+class PronunciationByGlosbe: public DictionaryDataInterface, GetWebPageContent
 {
-  std::vector<std::string> getData(const std::string &sentence){
-    if(lastAddr == makeAddress(sentence))//check performance without this if(also in translation and youMean)
+  std::vector<std::string> getData(const std::string &addr){
+    if(lastAddr == addr)//check performance without this if(also in translation and youMean)
       return res;  
-  
-    auto tmp = getContent(webInterface->getWebPageCode(makeAddress(sentence)),
+    lastAddr = addr;
+      
+    auto tmp = getContent(webInterface->getWebPageCode(addr),
 			   "IPA:</span><span> (.*?)</span");
 
     if(!tmp.empty())
