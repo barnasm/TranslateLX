@@ -19,7 +19,7 @@ void MainWindow::setWindow(){
  
   boxCentral.add(textTranslation);
   boxCentral.add(textPronunciation);
-  boxCentral.add(buttonAudio);
+  boxCentral.add(buttonPronunciationVoice);
   boxCentral.add(comboLangFrom);
   boxCentral.add(comboLangTo);
   
@@ -31,8 +31,14 @@ void MainWindow::setWindow(){
   //textTranslation.set_editable(false);
   //textPronunciation.set_editable(false);
 
+  // Glib::RefPtr<Gtk::TextChildAnchor> refAnchor =
+  //   textPronunciation.get_buffer()->create_child_anchor(textPronunciation.get_buffer()->end());
+  // textPronunciation.add_child_at_anchor(buttonPronunciationVoice, refAnchor);
+  
   buttonPrev.signal_clicked().connect( sigc::bind<Gtk::Button*>( sigc::mem_fun(*this, &MainWindow::onButtonClicked), &buttonPrev) );
   buttonNext.signal_clicked().connect( sigc::bind<Gtk::Button*>( sigc::mem_fun(*this, &MainWindow::onButtonClicked), &buttonNext) );
+  buttonPronunciationVoice.signal_clicked().
+    connect(sigc::mem_fun(*this, &MainWindow::onButtonPronunciationVoice));
 
   show_all();
   // window = new QWidget;
@@ -58,6 +64,34 @@ void MainWindow::onButtonClicked(Gtk::Button* b){
     textPronunciation.get_buffer()->
       set_text(di->getPronunciation().empty()?"Not found":di->getPronunciation()[elem % (di->getPronunciation().size())]);
 }
+void MainWindow::onButtonPronunciationVoice(){
+  if(di->getPronunciationVoiceAddr().empty())
+    return;
+  
+  std::cout << "play\n";
+
+  GstElement *pipeline;
+  GstBus *bus;
+  GstMessage *msg;
+
+   /* Build the pipeline */
+  std::string addr = "playbin uri="+ di->baseAddr +di->getPronunciationVoiceAddr()[0];
+  pipeline = gst_parse_launch (addr.c_str(), NULL);
+
+  /* Start playing */
+  gst_element_set_state (pipeline, GST_STATE_PLAYING);
+
+  /* Wait until error or EOS */
+  bus = gst_element_get_bus (pipeline);
+  msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE, (GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+
+  /* Free resources */
+  if (msg != NULL)
+    gst_message_unref (msg);
+  gst_object_unref (bus);
+  gst_element_set_state (pipeline, GST_STATE_NULL);
+  gst_object_unref (pipeline);
+}
 
 void MainWindow::clipboardOwnerChange(GdkEventOwnerChange*)
 {
@@ -66,14 +100,15 @@ void MainWindow::clipboardOwnerChange(GdkEventOwnerChange*)
   std::string sel = clipboard->wait_for_text();
   di->getTranslation(sel);
   di->getPronunciation(sel);
-  
+  di->getPronunciationVoiceAddr(sel);
+
   std::cout << "\twait for text: " << sel << std::endl;
-  auto data = di->getTranslation();
-  for(auto a: data)
+  for(auto a: di->getTranslation())
     std::cout << a << std::endl;
 
   textTranslation.get_buffer()  ->set_text(di->getTranslation().empty()?   "Not found": di->getTranslation()[0]);
   textPronunciation.get_buffer()->set_text(di->getPronunciation().empty()? "Not found": di->getPronunciation()[0]);
+  //textPronunciation.get_buffer()->insert(textPronunciation.get_buffer()->begin(), di->getPronunciation().empty()? "Not found": di->getPronunciation()[0]);
 }
 
 /*void MainWindow::setWindowPosition(QPoint pos = QCursor::pos()){

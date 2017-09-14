@@ -17,9 +17,11 @@ protected:
   //DictionaryDataInterface *example;
   //DictionaryDataInterface *definition;
   LanguageListByGlosbe *languageList;
-  //voice
+  DictionaryDataInterface *pva;
   
 public:
+  const std::string baseAddr = "https://glosbe.com";
+
   virtual std::vector<std::string> getTranslation(const std::string& sentence){
     return translation->getData( sentence );
   }
@@ -34,7 +36,9 @@ public:
   virtual std::map<std::string, std::string> getLanguageList(){
     return languageList->getData();
   }
-  //getVoice();
+  virtual std::vector<std::string> getPronunciationVoiceAddr(const std::string& sentence){
+    return pva->getData(sentence);
+  }
   
   virtual std::vector<std::string> getTranslation(){
     return translation->getData();
@@ -44,6 +48,9 @@ public:
   }
   virtual std::vector<std::string> getPronunciation(){
     return pronunciation->getData();
+  }
+  virtual std::vector<std::string> getPronunciationVoiceAddr(){
+    return pva->getData();
   }
 };
 

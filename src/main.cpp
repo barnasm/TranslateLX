@@ -2,10 +2,10 @@
 #include "mainWindow.h"
 #include "clipboardService.h"
 #include "diGlosbe.h"
+#include <gst/gst.h>
 
-//#include <gst/gst.h>
 int main(int argc, char *argv[]){
-
+  gst_init (&argc, &argv);
   auto app = Gtk::Application::create("org.gtkmm.TranslateLx",
 				      Gio::APPLICATION_NON_UNIQUE);
 

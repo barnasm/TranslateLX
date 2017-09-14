@@ -24,6 +24,8 @@
 #include <gtkmm/button.h>
 #include <gtkmm/scrollbar.h>
 #include <gtkmm/combobox.h>
+#include <gst/gst.h>
+
 class MainWindow : public Gtk::Window
 {
 private:
@@ -38,7 +40,7 @@ private:
   Gtk::Scrollbar scrollPronunciation;
   Gtk::Button buttonPrev;
   Gtk::Button buttonNext;
-  Gtk::Button buttonAudio;
+  Gtk::Button buttonPronunciationVoice;
   Gtk::ComboBox comboLangFrom;
   Gtk::ComboBox comboLangTo;
   void setWindow();
@@ -86,6 +88,7 @@ public:
 
 //signals handlers
   void onButtonClicked(Gtk::Button*);
+  void onButtonPronunciationVoice();
   void clipboardOwnerChange(GdkEventOwnerChange*);
   /*
   void setWindowPosition(QPoint pos);
