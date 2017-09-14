@@ -10,8 +10,7 @@
 
 class DictionaryInterface
 {
-public:
-  
+protected:
   DictionaryDataInterface *translation;
   DictionaryDataInterface *youMean;
   DictionaryDataInterface *pronunciation;
@@ -19,7 +18,8 @@ public:
   //DictionaryDataInterface *definition;
   LanguageListByGlosbe *languageList;
   //voice
-
+  
+public:
   virtual std::vector<std::string> getTranslation(const std::string& sentence){
     return translation->getData( sentence );
   }
@@ -35,6 +35,16 @@ public:
     return languageList->getData();
   }
   //getVoice();
+  
+  virtual std::vector<std::string> getTranslation(){
+    return translation->getData();
+  }
+  virtual std::vector<std::string> getYouMean(){
+    return youMean->getData();
+  }
+  virtual std::vector<std::string> getPronunciation(){
+    return pronunciation->getData();
+  }
 };
 
 #endif

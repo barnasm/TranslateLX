@@ -17,6 +17,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 */
+#include "dictionaryInterface.h"
 #include <gtkmm/window.h>
 #include <gtkmm/textview.h>
 #include <gtkmm/box.h>
@@ -26,6 +27,9 @@
 class MainWindow : public Gtk::Window
 {
 private:
+  unsigned int elem = 0;
+  DictionaryInterface* di;
+  
   Gtk::HBox boxPrimary;
   Gtk::VBox boxCentral;
   Gtk::TextView textTranslation;
@@ -77,8 +81,12 @@ private:
     QAction *actionQuit;
   */
 public:
-  MainWindow();
+  MainWindow(DictionaryInterface*);
   virtual ~MainWindow(){};
+
+//signals handlers
+  void onButtonClicked(Gtk::Button*);
+  void clipboardOwnerChange(GdkEventOwnerChange*);
   /*
   void setWindowPosition(QPoint pos);
     void windowShow();

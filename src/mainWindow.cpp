@@ -1,6 +1,6 @@
 #include "mainWindow.h"
 
-MainWindow::MainWindow()
+MainWindow::MainWindow(DictionaryInterface* di): di(di)
 {
   //setTray();
   setWindow();
@@ -25,10 +25,15 @@ void MainWindow::setWindow(){
   
   textTranslation.set_size_request(200, 20);
   textPronunciation.set_size_request(200, 20);
+  textTranslation.set_cursor_visible(false);
   // textTranslation.set_vscroll_policy(Gtk::ScrollablePolicy::SCROLL_MINIMUM);
   // textPronunciation.set_vscroll_policy(Gtk::ScrollablePolicy::SCROLL_NATURAL);
   //textTranslation.set_editable(false);
   //textPronunciation.set_editable(false);
+
+  buttonPrev.signal_clicked().connect( sigc::bind<Gtk::Button*>( sigc::mem_fun(*this, &MainWindow::onButtonClicked), &buttonPrev) );
+  buttonNext.signal_clicked().connect( sigc::bind<Gtk::Button*>( sigc::mem_fun(*this, &MainWindow::onButtonClicked), &buttonNext) );
+
   show_all();
   // window = new QWidget;
     //     window->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Drawer);
@@ -38,6 +43,39 @@ void MainWindow::setWindow(){
     //     window->setFixedSize(*windowSizeMin);
     //     setWindowPosition(QCursor::pos());
 }
+
+void MainWindow::onButtonClicked(Gtk::Button* b){
+  //textEdit->moveCursor(QTextCursor::Start);
+
+  if(b == &buttonPrev)
+    --elem;
+  else if(b == &buttonNext)
+    ++elem;
+  
+    textTranslation.get_buffer()->
+      set_text(di->getTranslation().empty()? "Not found": di->getTranslation() [elem % (di->getTranslation().size())]); 
+
+    textPronunciation.get_buffer()->
+      set_text(di->getPronunciation().empty()?"Not found":di->getPronunciation()[elem % (di->getPronunciation().size())]);
+}
+
+void MainWindow::clipboardOwnerChange(GdkEventOwnerChange*)
+{
+  elem = 0;
+  auto clipboard = Gtk::Clipboard::get(GDK_SELECTION_PRIMARY);
+  std::string sel = clipboard->wait_for_text();
+  di->getTranslation(sel);
+  di->getPronunciation(sel);
+  
+  std::cout << "\twait for text: " << sel << std::endl;
+  auto data = di->getTranslation();
+  for(auto a: data)
+    std::cout << a << std::endl;
+
+  textTranslation.get_buffer()  ->set_text(di->getTranslation().empty()?   "Not found": di->getTranslation()[0]);
+  textPronunciation.get_buffer()->set_text(di->getPronunciation().empty()? "Not found": di->getPronunciation()[0]);
+}
+
 /*void MainWindow::setWindowPosition(QPoint pos = QCursor::pos()){
     window->move(pos);
 }
@@ -54,16 +92,6 @@ void MainWindow::setWidgets(){
 
     connect(buttonPrev, SIGNAL(clicked()), this, SLOT(buttonClicked()));
     connect(buttonNext, SIGNAL(clicked()), this, SLOT(buttonClicked()));
-}
-void MainWindow::buttonClicked(){
-    textEdit->clear();
-    textEdit->moveCursor(QTextCursor::Start);
-
-    if(sender() == buttonPrev){
-        textEdit->insertPlainText(contentOfWebpage->getPrev().toStdString().c_str());
-    }else if(sender() == buttonNext){
-        textEdit->insertPlainText(contentOfWebpage->getNext().toStdString().c_str());
-    }
 }
 
 void MainWindow::setLayout(){

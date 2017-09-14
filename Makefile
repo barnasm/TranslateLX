@@ -34,13 +34,13 @@ $(EXE): $(OBJ)
 
 test: $(TEST_DIR)/tests.cpp
 
-$(TEST_DIR)/tests.cpp: obj/wiCurl.o obj/clipboardService.o
+$(TEST_DIR)/tests.cpp: obj/wiCurl.o obj/clipboardService.o obj/mainWindow.o  obj/webInterface.o
 	 $(CC) $(CFLAGS) \
-			-I/home/michal/cppLibs/boost_1_61_0/ \
-			$(LDFLAGS) \
-			$@ $^ \
-			$(LDLIBS) \
-			-o tests/tests 
+	-I/home/michal/cppLibs/boost_1_61_0/ \
+	$(LDFLAGS) \
+	$@ $^ \
+	$(LDLIBS) \
+	-o tests/tests 
 #g++ -I/home/michal/Pulpit/boost_1_61_0/ tests/tests.cpp -L/home/michal/Pulpit/boost_1_61_0/stage/lib/libboost_unit_test_framework.so -o hello
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
