@@ -19,33 +19,42 @@ void MainWindow::setWindow(){
  
   boxCentral.add(textTranslation);
   boxCentral.add(textPronunciation);
-  boxCentral.add(buttonPronunciationVoice);
-  boxCentral.add(comboLangFrom);
-  boxCentral.add(comboLangTo);
+  //boxCentral.add(buttonPronunciationVoice);
+  //boxCentral.add(comboLangFrom);
+  //boxCentral.add(buttonSwapLanguages);
+  //boxCentral.add(comboLangTo);
+  gridCentral.attach(comboLangFrom, 0, 0, 2, 1);
+  gridCentral.attach(comboLangTo,   0, 1, 2, 1);
+  gridCentral.attach(buttonSwapLanguages, 2, 0, 1, 2);
+  boxCentral.add(gridCentral);
+
+
   
   textTranslation.set_size_request(200, 20);
   textPronunciation.set_size_request(200, 20);
   textTranslation.set_cursor_visible(false);
   // textTranslation.set_vscroll_policy(Gtk::ScrollablePolicy::SCROLL_MINIMUM);
   // textPronunciation.set_vscroll_policy(Gtk::ScrollablePolicy::SCROLL_NATURAL);
-  //textTranslation.set_editable(false);
-  //textPronunciation.set_editable(false);
+  textTranslation.set_editable(false);
+  textPronunciation.set_editable(false);
 
-  // Glib::RefPtr<Gtk::TextChildAnchor> refAnchor =
-  //   textPronunciation.get_buffer()->create_child_anchor(textPronunciation.get_buffer()->end());
-  // textPronunciation.add_child_at_anchor(buttonPronunciationVoice, refAnchor);
+  Glib::RefPtr<Gtk::TextChildAnchor> refAnchor =
+    textPronunciation.get_buffer()->create_child_anchor(textPronunciation.get_buffer()->begin());
+  textPronunciation.add_child_at_anchor(buttonPronunciationVoice, refAnchor);
   
   buttonPrev.set_label("◀");
   buttonNext.set_label("▶");
   buttonPronunciationVoice.set_label("♬");
+  buttonSwapLanguages.set_label("⤸");
+
   buttonPrev.signal_clicked().connect( sigc::bind<Gtk::Button*>( sigc::mem_fun(*this, &MainWindow::onButtonClicked), &buttonPrev) );
   buttonNext.signal_clicked().connect( sigc::bind<Gtk::Button*>( sigc::mem_fun(*this, &MainWindow::onButtonClicked), &buttonNext) );
   buttonPronunciationVoice.signal_clicked().
     connect(sigc::mem_fun(*this, &MainWindow::onButtonPronunciationVoice));
-
-
-  comboLangFrom.signal_changed().connect(sigc::bind<Gtk::ComboBoxText*>(sigc::mem_fun(*this, &MainWindow::comboChanged), &comboLangFrom));
-  comboLangTo.  signal_changed().connect(sigc::bind<Gtk::ComboBoxText*>(sigc::mem_fun(*this, &MainWindow::comboChanged), &comboLangTo));
+  buttonSwapLanguages.signal_clicked().
+    connect( sigc::bind<Gtk::Widget*>( sigc::mem_fun(*this, &MainWindow::onLanguageChange), &buttonSwapLanguages) );
+  comboLangFrom.signal_changed().connect(sigc::bind<Gtk::Widget*>(sigc::mem_fun(*this, &MainWindow::onLanguageChange), &comboLangFrom));
+  comboLangTo.  signal_changed().connect(sigc::bind<Gtk::Widget*>(sigc::mem_fun(*this, &MainWindow::onLanguageChange), &comboLangTo));
   insertLanguagesToCombos();
   
   show_all();
@@ -59,19 +68,25 @@ void MainWindow::setWindow(){
 }
 
 void MainWindow::onButtonClicked(Gtk::Button* b){
-  //textEdit->moveCursor(QTextCursor::Start);
-
   if(b == &buttonPrev)
     --elem;
   else if(b == &buttonNext)
     ++elem;
-  
+
+  setTextVeiws();
+}
+void MainWindow::setTextVeiws(){  
     textTranslation.get_buffer()->
       set_text(di->getTranslation().empty()? "Not found": di->getTranslation() [elem % (di->getTranslation().size())]); 
 
     textPronunciation.get_buffer()->
-      set_text(di->getPronunciation().empty()?"Not found":di->getPronunciation()[elem % (di->getPronunciation().size())]);
+      erase(++textPronunciation.get_buffer()->begin(), textPronunciation.get_buffer()->end());
+    textPronunciation.get_buffer()->
+      insert(++textPronunciation.get_buffer()->begin(),
+    	     di->getPronunciation().empty()?"Not found":di->getPronunciation()[elem % (di->getPronunciation().size())]);
+    //set_text(di->getPronunciation().empty()?"Not found":di->getPronunciation()[elem % (di->getPronunciation().size())]);
 }
+
 void MainWindow::onButtonPronunciationVoice(){
   if(di->getPronunciationVoiceAddr().empty())
     return;
@@ -103,7 +118,6 @@ void MainWindow::onButtonPronunciationVoice(){
 
 void MainWindow::clipboardOwnerChange(GdkEventOwnerChange*)
 {
-  elem = 0;
   auto clipboard = Gtk::Clipboard::get(GDK_SELECTION_PRIMARY);
   std::string sel = clipboard->wait_for_text();
   di->getTranslation(sel);
@@ -114,16 +128,20 @@ void MainWindow::clipboardOwnerChange(GdkEventOwnerChange*)
   for(auto a: di->getTranslation())
     std::cout << a << std::endl;
 
-  textTranslation.get_buffer()  ->set_text(di->getTranslation().empty()?   "Not found": di->getTranslation()[0]);
-  textPronunciation.get_buffer()->set_text(di->getPronunciation().empty()? "Not found": di->getPronunciation()[0]);
-  //textPronunciation.get_buffer()->insert(textPronunciation.get_buffer()->begin(), di->getPronunciation().empty()? "Not found": di->getPronunciation()[0]);
+  elem = 0;
+  setTextVeiws();
 }
 
-void MainWindow::comboChanged(Gtk::ComboBoxText* combo){
+void MainWindow::onLanguageChange(Gtk::Widget* combo){
+  std::cout << "changed\n";
   if(combo == &comboLangFrom){
-    di->langFromShort = di->getLanguageList()[combo->get_active_text()];
+    di->langFromShort = di->getLanguageList()[((Gtk::ComboBoxText*)combo)->get_active_text()];
   }else if(combo == &comboLangTo){
-    di->langToShort = di->getLanguageList()[combo->get_active_text()];
+    di->langToShort = di->getLanguageList()[((Gtk::ComboBoxText*)combo)->get_active_text()];
+  }else if(combo == &buttonSwapLanguages){
+    auto tmp = comboLangFrom.get_active_row_number();
+    comboLangFrom.set_active(comboLangTo.get_active_row_number());
+    comboLangTo.set_active(tmp);
   }
 }
 

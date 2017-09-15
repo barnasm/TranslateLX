@@ -21,6 +21,7 @@
 #include <gtkmm/window.h>
 #include <gtkmm/textview.h>
 #include <gtkmm/box.h>
+#include <gtkmm/grid.h>
 #include <gtkmm/button.h>
 #include <gtkmm/scrollbar.h>
 #include <gtkmm/comboboxtext.h>
@@ -29,11 +30,12 @@
 class MainWindow : public Gtk::Window
 {
 private:
-  unsigned int elem = 0;
+  size_t elem = 0;
   DictionaryInterface* di;
   
   Gtk::HBox boxPrimary;
   Gtk::VBox boxCentral;
+  Gtk::Grid gridCentral;
   Gtk::TextView textTranslation;
   Gtk::TextView textPronunciation;
   Gtk::Scrollbar scrollTranslation;
@@ -41,9 +43,11 @@ private:
   Gtk::Button buttonPrev;
   Gtk::Button buttonNext;
   Gtk::Button buttonPronunciationVoice;
+  Gtk::Button buttonSwapLanguages;
   Gtk::ComboBoxText comboLangFrom;
   Gtk::ComboBoxText comboLangTo;
   void setWindow();
+  void setTextVeiws();
 
   /*
 private:
@@ -87,10 +91,11 @@ public:
   virtual ~MainWindow(){};
 
 //signals handlers
+  void clipboardOwnerChange(GdkEventOwnerChange*);
+private:
   void onButtonClicked(Gtk::Button*);
   void onButtonPronunciationVoice();
-  void comboChanged(Gtk::ComboBoxText*);
-  void clipboardOwnerChange(GdkEventOwnerChange*);
+  void onLanguageChange(Gtk::Widget*);
   void insertLanguagesToCombos();
   /*
   void setWindowPosition(QPoint pos);
