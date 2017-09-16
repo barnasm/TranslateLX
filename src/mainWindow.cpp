@@ -16,31 +16,47 @@ void MainWindow::setWindow(){
   boxPrimary.add(buttonPrev);
   boxPrimary.add(boxCentral);
   boxPrimary.add(buttonNext);
- 
-  boxCentral.add(textTranslation);
-  boxCentral.add(textPronunciation);
+  
+  // boxCentral.add(scrolledwindowTranslation);
+  // boxCentral.add(scrolledwindowPronunciation);
   //boxCentral.add(buttonPronunciationVoice);
   //boxCentral.add(comboLangFrom);
   //boxCentral.add(buttonSwapLanguages);
   //boxCentral.add(comboLangTo);
-  gridCentral.attach(comboLangFrom, 0, 0, 2, 1);
-  gridCentral.attach(comboLangTo,   0, 1, 2, 1);
-  gridCentral.attach(buttonSwapLanguages, 2, 0, 1, 2);
+  //spinner.start();
+  gridCentral.attach(spinner, 0, 0, 2, 2);  
+  gridCentral.attach(scrolledwindowTranslation, 0, 0, 2, 1);
+  gridCentral.attach(scrolledwindowPronunciation, 0, 1, 2, 1);
+  gridCentral.attach(buttonPronunciationVoice, 2, 0, 2, 2);
+  gridCentral.attach(comboLangFrom, 0, 2, 2, 1);
+  gridCentral.attach(comboLangTo,   0, 3, 2, 1);
+  gridCentral.attach(buttonSwapLanguages, 2, 2, 2, 2);
   boxCentral.add(gridCentral);
 
 
+  scrolledwindowTranslation.add(textTranslation);
+  scrolledwindowPronunciation.add(textPronunciation);
   
-  textTranslation.set_size_request(200, 20);
-  textPronunciation.set_size_request(200, 20);
-  textTranslation.set_cursor_visible(false);
-  // textTranslation.set_vscroll_policy(Gtk::ScrollablePolicy::SCROLL_MINIMUM);
-  // textPronunciation.set_vscroll_policy(Gtk::ScrollablePolicy::SCROLL_NATURAL);
+  textTranslation.set_size_request(100, 20);
+  textPronunciation.set_size_request(100, 20);
+  // textTranslation.set_wrap_mode(Gtk::WrapMode::WRAP_WORD_CHAR);
+  // textPronunciation.set_wrap_mode(Gtk::WrapMode::WRAP_WORD_CHAR);
+  
+  // textTranslation.set_cursor_visible(false);
+  // textPronunciation.set_cursor_visible(false);
   textTranslation.set_editable(false);
   textPronunciation.set_editable(false);
+  // texttranslation.set_sensitive(false);
+  // textPronunciation.set_sensitive(false);
+  textTranslation.set_hexpand(false);
+  textPronunciation.set_hexpand(false);
+  textTranslation.set_vexpand_set(false);
+  textPronunciation.set_vexpand_set(false);
 
-  Glib::RefPtr<Gtk::TextChildAnchor> refAnchor =
-    textPronunciation.get_buffer()->create_child_anchor(textPronunciation.get_buffer()->begin());
-  textPronunciation.add_child_at_anchor(buttonPronunciationVoice, refAnchor);
+  
+  // Glib::RefPtr<Gtk::TextChildAnchor> refAnchor =
+  //   textPronunciation.get_buffer()->create_child_anchor(textPronunciation.get_buffer()->end());
+  // textPronunciation.add_child_at_anchor(buttonPronunciationVoice, refAnchor);
   
   buttonPrev.set_label("◀");
   buttonNext.set_label("▶");
@@ -58,13 +74,6 @@ void MainWindow::setWindow(){
   insertLanguagesToCombos();
   
   show_all();
-  // window = new QWidget;
-    //     window->setWindowFlags(Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint | Qt::Drawer);
-
-    //     window->setMinimumSize(*windowSizeMin);
-    //     window->setMaximumSize(*windowSizeMax);
-    //     window->setFixedSize(*windowSizeMin);
-    //     setWindowPosition(QCursor::pos());
 }
 
 void MainWindow::onButtonClicked(Gtk::Button* b){
@@ -77,14 +86,20 @@ void MainWindow::onButtonClicked(Gtk::Button* b){
 }
 void MainWindow::setTextVeiws(){  
     textTranslation.get_buffer()->
-      set_text(di->getTranslation().empty()? "Not found": di->getTranslation() [elem % (di->getTranslation().size())]); 
-
+      set_text(di->getTranslation().empty()?
+	       (di->getYouMean().empty()?
+		"Not found"
+		:di->getYouMean() [elem % (di->getYouMean().size())]
+		):
+	       di->getTranslation() [elem % (di->getTranslation().size())]); 
+    
+    // textPronunciation.get_buffer()->
+    //   erase(textPronunciation.get_buffer()->begin(), --textPronunciation.get_buffer()->end());
+    // textPronunciation.get_buffer()->
+    //   insert(textPronunciation.get_buffer()->begin(),
+    // 	     di->getPronunciation().empty()?"Not found":di->getPronunciation()[elem % (di->getPronunciation().size())]);
     textPronunciation.get_buffer()->
-      erase(++textPronunciation.get_buffer()->begin(), textPronunciation.get_buffer()->end());
-    textPronunciation.get_buffer()->
-      insert(++textPronunciation.get_buffer()->begin(),
-    	     di->getPronunciation().empty()?"Not found":di->getPronunciation()[elem % (di->getPronunciation().size())]);
-    //set_text(di->getPronunciation().empty()?"Not found":di->getPronunciation()[elem % (di->getPronunciation().size())]);
+      set_text(di->getPronunciation().empty()?"Not found":di->getPronunciation()[elem % (di->getPronunciation().size())]);
 }
 
 void MainWindow::onButtonPronunciationVoice(){
@@ -116,20 +131,36 @@ void MainWindow::onButtonPronunciationVoice(){
   gst_object_unref (pipeline);
 }
 
+void work(MainWindow* win, DictionaryInterface* di, std::string& sel){
+  if(sel != ""){//i dont know there is weird kind of bug - getting selection from entry or textView is generating more than one selection change signal(entry generates 2 signals textView generates signals depending on mouse movement) and last signal deliver empty string; to solve it check clippord documentation again(i did it a few times) or maybe it is gtk bug so try to install newer version
+    
+    // if(di->getTranslation(sel).empty())
+    //   di->getYouMean(sel);
+    
+    // di->getPronunciation(sel);
+    // di->getPronunciationVoiceAddr(sel);
+    
+    // std::cout << "\twait for text: " << sel << std::endl;
+    // for(auto a: di->getTranslation())
+    //   std::cout << a << std::endl;
+  }  
+  win->onNotificationFromThread();  
+}
+  
 void MainWindow::clipboardOwnerChange(GdkEventOwnerChange*)
 {
+  spinner.start();
+  elem = 0;
   auto clipboard = Gtk::Clipboard::get(GDK_SELECTION_PRIMARY);
   std::string sel = clipboard->wait_for_text();
-  di->getTranslation(sel);
-  di->getPronunciation(sel);
-  di->getPronunciationVoiceAddr(sel);
-
-  std::cout << "\twait for text: " << sel << std::endl;
-  for(auto a: di->getTranslation())
-    std::cout << a << std::endl;
-
-  elem = 0;
+  //thr = new std::thread(work, this, di);
+  //thr->join();
+  //std::thread a(work, this, di, clipboard->wait_for_text());
+  //a.join();
+}
+void MainWindow::onNotificationFromThread(){
   setTextVeiws();
+  spinner.stop();
 }
 
 void MainWindow::onLanguageChange(Gtk::Widget* combo){

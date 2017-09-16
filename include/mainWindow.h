@@ -19,12 +19,16 @@
 */
 #include "dictionaryInterface.h"
 #include <gtkmm/window.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/textview.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/box.h>
 #include <gtkmm/grid.h>
 #include <gtkmm/button.h>
 #include <gtkmm/scrollbar.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/spinner.h>
+#include <thread>
 #include <gst/gst.h>
 
 class MainWindow : public Gtk::Window
@@ -32,20 +36,22 @@ class MainWindow : public Gtk::Window
 private:
   size_t elem = 0;
   DictionaryInterface* di;
+  std::thread *thr;
   
   Gtk::HBox boxPrimary;
   Gtk::VBox boxCentral;
   Gtk::Grid gridCentral;
-  Gtk::TextView textTranslation;
-  Gtk::TextView textPronunciation;
-  Gtk::Scrollbar scrollTranslation;
-  Gtk::Scrollbar scrollPronunciation;
+  Gtk::ScrolledWindow scrolledwindowTranslation;
+  Gtk::ScrolledWindow scrolledwindowPronunciation;
+  Gtk::Entry textTranslation; //this field also shows youMean content if no translation found
+  Gtk::Entry textPronunciation;
   Gtk::Button buttonPrev;
   Gtk::Button buttonNext;
   Gtk::Button buttonPronunciationVoice;
   Gtk::Button buttonSwapLanguages;
   Gtk::ComboBoxText comboLangFrom;
   Gtk::ComboBoxText comboLangTo;
+  Gtk::Spinner spinner;
   void setWindow();
   void setTextVeiws();
 
@@ -89,6 +95,7 @@ private:
 public:
   MainWindow(DictionaryInterface*);
   virtual ~MainWindow(){};
+  void onNotificationFromThread();
 
 //signals handlers
   void clipboardOwnerChange(GdkEventOwnerChange*);
