@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=TranslateLX
+Comment=text translator
+GenericName=Translator
+X-GNOME-FullName=TranslateLX
+Exec=path/TranslateLX
+Terminal=true
+X-MultipleArgs=false
+Type=Application
+Icon=path/icon/translateIcon.png
+Categories=Translate;Learn;
+StartupNotify=true
+Name[pl_PL]=TranslateLX

@@ -16,13 +16,11 @@ OBJ = $(SRC:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
 
 CPPFLAGS += -I./include 
 CFLAGS += -std=c++11 -Wall -pedantic
-LDFLAGS +=\
-	-I/home/michal/cppLibs/curl-7.60.0/CURL-7.60.0/include/\
-	-L/home/michal/cppLibs/curl-7.60.0/CURL-7.60.0/lib/\
-	-L/home/michal/cppLibs/openssl-1.1.1/openssl/lib/\
-	-L./lib 
 
-#LDLIBS = $(SUBLIBS)`pkg-config gtkmm-3.0 --cflags --libs` `pkg-config --cflags gtk+-3.0` `pkg-config --libs gtk+-3.0` `pkg-config --cflags gtk+-3.0` `pkg-config gtkmm-3.0` `pkg-config --libs gtk+-3.0` `pkg-config --cflags --libs gstreamer-1.0` -lcurl -lssl -lcrypto
+#LDFLAGS +=\
+#	-I$(HOME)/cppLibs/curl-7.60.0/CURL-7.60.0/include/\
+#	-L$(HOME)/cppLibs/curl-7.60.0/CURL-7.60.0/lib/\
+#	-L$(HOME)/cppLibs/openssl-1.1.1/openssl/lib/
 
 LDLIBS = $(SUBLIBS)\
 `pkg-config gtkmm-3.0     --cflags --libs`\
@@ -30,12 +28,9 @@ LDLIBS = $(SUBLIBS)\
 `pkg-config gstreamer-1.0 --cflags --libs`\
 -lcurl -lssl -lcrypto
 
-#`pkg-config gtkmm-3.0`\
-
-
 .PHONY: all clean
 
-all: $(EXE)
+all: dirs $(EXE)
 
 $(EXE): $(OBJ)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(CPPFLAGS) $^ $(LDLIBS) -o $@
@@ -43,15 +38,17 @@ $(EXE): $(OBJ)
 test: $(TEST_DIR)/tests.cpp
 $(TEST_DIR)/tests.cpp: obj/wiCurl.o obj/clipboardService.o obj/mainWindow.o  obj/webInterface.o
 	 $(CC) $(CFLAGS) \
-	-I/home/michal/cppLibs/boost_1_61_0/ \
+	-I~/cppLibs/boost_1_61_0/ \
 	$(LDFLAGS) \
 	$@ $^ \
 	$(LDLIBS) \
 	-o tests/tests 
-#g++ -I/home/michal/Pulpit/boost_1_61_0/ tests/tests.cpp -L/home/michal/Pulpit/boost_1_61_0/stage/lib/libboost_unit_test_framework.so -o hello
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -c $< $(LDLIBS) -o $@		
 
+dirs:
+	mkdir -p $(OBJ_DIR)
+
 clean:
-	$(RM) $(OBJ)
+	$(RM) -R $(OBJ_DIR) $(EXE)
