@@ -28,8 +28,8 @@ void MainWindow::setWindow(){
   gridCentral.attach(scrolledwindowTranslation, 0, 0, 2, 1);
   gridCentral.attach(scrolledwindowPronunciation, 0, 1, 2, 1);
   gridCentral.attach(buttonPronunciationVoice, 2, 0, 2, 2);
-  gridCentral.attach(comboLangFrom, 0, 2, 2, 1);
-  gridCentral.attach(comboLangTo,   0, 3, 2, 1);
+  gridCentral.attach(comboLangFrom, 0, 2, 1, 1);
+  gridCentral.attach(comboLangTo,   0, 3, 1, 1);
   gridCentral.attach(buttonSwapLanguages, 2, 2, 2, 2);
   boxCentral.add(gridCentral);
 
@@ -37,8 +37,8 @@ void MainWindow::setWindow(){
   scrolledwindowTranslation.add(textTranslation);
   scrolledwindowPronunciation.add(textPronunciation);
   
-  textTranslation.set_size_request(100, 20);
-  textPronunciation.set_size_request(100, 20);
+  // textTranslation.set_size_request(80, 20);
+  // textPronunciation.set_size_request(80, 20);
   // textTranslation.set_wrap_mode(Gtk::WrapMode::WRAP_WORD_CHAR);
   // textPronunciation.set_wrap_mode(Gtk::WrapMode::WRAP_WORD_CHAR);
   
@@ -108,44 +108,51 @@ void MainWindow::onButtonPronunciationVoice(){
   
   std::cout << "play\n";
 
-  GstElement *pipeline;
-  GstBus *bus;
-  GstMessage *msg;
+  auto work = [&]{
+    GstElement *pipeline;
+    GstBus *bus;
+    GstMessage *msg;
 
-   /* Build the pipeline */
-  std::string addr = "playbin uri="+ di->baseAddr +di->getPronunciationVoiceAddr()[0];
-  pipeline = gst_parse_launch (addr.c_str(), NULL);
+    /* Build the pipeline */
+    std::string addr = "playbin uri="+ di->baseAddr +di->getPronunciationVoiceAddr()[0];
+    pipeline = gst_parse_launch (addr.c_str(), NULL);
 
-  /* Start playing */
-  gst_element_set_state (pipeline, GST_STATE_PLAYING);
+    /* Start playing */
+    gst_element_set_state (pipeline, GST_STATE_PLAYING);
 
-  /* Wait until error or EOS */
-  bus = gst_element_get_bus (pipeline);
-  msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE, (GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+    /* Wait until error or EOS */
+    bus = gst_element_get_bus (pipeline);
+    msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE, (GstMessageType)(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
 
-  /* Free resources */
-  if (msg != NULL)
-    gst_message_unref (msg);
-  gst_object_unref (bus);
-  gst_element_set_state (pipeline, GST_STATE_NULL);
-  gst_object_unref (pipeline);
+    /* Free resources */
+    if (msg != NULL)
+      gst_message_unref (msg);
+    gst_object_unref (bus);
+    gst_element_set_state (pipeline, GST_STATE_NULL);
+    gst_object_unref (pipeline);
+  };
+  
+  if(thr and thr->joinable())
+    thr->join();
+
+  thr = std::unique_ptr<std::thread>(new std::thread(work));
 }
 
-void work(MainWindow* win, DictionaryInterface* di, std::string& sel){
-  if(sel != ""){//i dont know there is weird kind of bug - getting selection from entry or textView is generating more than one selection change signal(entry generates 2 signals textView generates signals depending on mouse movement) and last signal deliver empty string; to solve it check clippord documentation again(i did it a few times) or maybe it is gtk bug so try to install newer version
+// void work(MainWindow* win, DictionaryInterface* di, std::string sel){
+//   if(sel != ""){//i dont know there is weird kind of bug - getting selection from entry or textView is generating more than one selection change signal(entry generates 2 signals textView generates signals depending on mouse movement) and last signal deliver empty string; to solve it check clippord documentation again(i did it a few times) or maybe it is gtk bug so try to install newer version
     
-    // if(di->getTranslation(sel).empty())
-    //   di->getYouMean(sel);
+//     if(di->getTranslation(sel).empty())
+//       di->getYouMean(sel);
     
-    // di->getPronunciation(sel);
-    // di->getPronunciationVoiceAddr(sel);
+//     di->getPronunciation(sel);
+//     di->getPronunciationVoiceAddr(sel);
     
-    // std::cout << "\twait for text: " << sel << std::endl;
-    // for(auto a: di->getTranslation())
-    //   std::cout << a << std::endl;
-  }  
-  win->onNotificationFromThread();  
-}
+//     std::cout << "\twait for text: " << sel << std::endl;
+//     for(auto a: di->getTranslation())
+//       std::cout << a << std::endl;
+//   }  
+//   win->onNotificationFromThread();  
+// }
   
 void MainWindow::clipboardOwnerChange(GdkEventOwnerChange*)
 {
@@ -153,10 +160,29 @@ void MainWindow::clipboardOwnerChange(GdkEventOwnerChange*)
   elem = 0;
   auto clipboard = Gtk::Clipboard::get(GDK_SELECTION_PRIMARY);
   std::string sel = clipboard->wait_for_text();
-  //thr = new std::thread(work, this, di);
-  //thr->join();
-  //std::thread a(work, this, di, clipboard->wait_for_text());
-  //a.join();
+
+  auto a = [&, sel]{
+    if(sel != ""){//i dont know there is weird kind of bug - getting selection from entry or textView is generating more than one selection change signal(entry generates 2 signals textView generates signals depending on mouse movement) and last signal deliver empty string; to solve it check clippord documentation again(i did it a few times) or maybe it is gtk bug so try to install newer version
+      
+      if(di->getTranslation(sel).empty())
+	di->getYouMean(sel);
+      
+      di->getPronunciation(sel);
+      di->getPronunciationVoiceAddr(sel);
+      
+      std::cout << "\twait for text: " << sel << std::endl;
+      for(auto a: di->getTranslation())
+	std::cout << a << std::endl;
+    }  
+    onNotificationFromThread();  
+    
+  };
+  
+  if(thr and thr->joinable())
+    thr->join();
+  
+  thr = std::unique_ptr<std::thread>(new std::thread(a));
+  //thr = std::unique_ptr<std::thread>(new std::thread(work, this, di, std::move(sel)));
 }
 void MainWindow::onNotificationFromThread(){
   setTextVeiws();
@@ -185,22 +211,9 @@ void MainWindow::insertLanguagesToCombos(){
   comboLangTo.  set_active_text("Polish");
 }
 
-/*void MainWindow::setWindowPosition(QPoint pos = QCursor::pos()){
+/*
+void MainWindow::setWindowPosition(QPoint pos = QCursor::pos()){
     window->move(pos);
-}
-
-void MainWindow::setWidgets(){
-    buttonPrev = new QPushButton("◀");
-        buttonPrev->setMaximumSize(*bottonSizeMax);
-
-    buttonNext = new QPushButton("▶");
-        buttonNext->setMaximumSize(*bottonSizeMax);
-
-    textEdit = new QPlainTextEdit;
-    setLayout();
-
-    connect(buttonPrev, SIGNAL(clicked()), this, SLOT(buttonClicked()));
-    connect(buttonNext, SIGNAL(clicked()), this, SLOT(buttonClicked()));
 }
 
 void MainWindow::setLayout(){

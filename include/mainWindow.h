@@ -29,6 +29,7 @@
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/spinner.h>
 #include <thread>
+#include <memory>
 #include <gst/gst.h>
 
 class MainWindow : public Gtk::Window
@@ -36,7 +37,7 @@ class MainWindow : public Gtk::Window
 private:
   size_t elem = 0;
   DictionaryInterface* di;
-  std::thread *thr;
+  std::unique_ptr<std::thread> thr;
   
   Gtk::HBox boxPrimary;
   Gtk::VBox boxCentral;
