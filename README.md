@@ -1,3 +1,3 @@
 # TranslateLX
 
-![alt text](https://github.com/barnasm/translatelx/description/demo.png)
+![alt text](https://github.com/barnasm/TranslateLX/blob/master/description/demo.gif)
